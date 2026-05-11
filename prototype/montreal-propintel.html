@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>PropIntel · Montreal Property Data</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0a;--bg1:#111;--bg2:#1a1a1a;--bg3:#222;--bg4:#2a2a2a;
+  --border:#2e2e2e;--border2:#3a3a3a;
+  --dim:#444;--muted:#666;--mid:#888;--base:#aaa;--bright:#ccc;--white:#e8e8e8;
+  --amber:#e8a030;--amber2:#c07010;--amber-bg:rgba(232,160,48,.08);
+  --green:#3d9e5a;--green-bg:rgba(61,158,90,.09);
+  --red:#c04040;--red-bg:rgba(192,64,64,.09);
+  --blue:#4080c0;--blue-bg:rgba(64,128,192,.08);
+  --mono:'IBM Plex Mono',monospace;
+  --sans:'IBM Plex Sans',sans-serif;
+  --r:3px;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--sans);background:var(--bg);color:var(--base);font-size:12px;line-height:1.4;display:flex;flex-direction:column}
+
+/* ── TOPBAR ── */
+#top{height:40px;display:flex;align-items:center;gap:0;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg1)}
+.t-logo{font-family:var(--mono);font-size:11px;color:var(--amber);padding:0 16px;border-right:1px solid var(--border);height:100%;display:flex;align-items:center;letter-spacing:.12em;white-space:nowrap}
+#t-search-wrap{flex:1;max-width:380px;position:relative;border-right:1px solid var(--border)}
+#t-search{width:100%;height:40px;font-family:var(--mono);font-size:11px;background:transparent;border:none;color:var(--white);padding:0 12px;outline:none}
+#t-search::placeholder{color:var(--dim)}
+#t-sugg{position:absolute;top:40px;left:0;right:0;background:var(--bg1);border:1px solid var(--border);border-top:none;z-index:999;display:none;max-height:320px;overflow-y:auto}
+.sugg-item{padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:11px}
+.sugg-item:hover{background:var(--bg2)}
+.sugg-addr{color:var(--white)}
+.sugg-meta{color:var(--muted);font-size:10px;margin-top:2px}
+.t-status{padding:0 14px;border-right:1px solid var(--border);height:100%;display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--dim)}
+.dot.ok{background:var(--green)}.dot.err{background:var(--red)}.dot.wait{background:var(--amber);animation:blink 1.2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+#t-counts{padding:0 14px;font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap}
+.t-spacer{flex:1}
+
+/* ── LAYOUT ── */
+#body{display:flex;flex:1;overflow:hidden}
+
+/* ── LEFT PANEL: FIELDS ── */
+#panel-fields{width:280px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;background:var(--bg1);overflow:hidden}
+#pf-head{padding:10px 12px 8px;border-bottom:1px solid var(--border);flex-shrink:0}
+.ph-title{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+.ph-sub{font-size:10px;color:var(--muted);line-height:1.5}
+.ph-actions{display:flex;gap:6px;margin-top:8px}
+.sm-btn{font-family:var(--mono);font-size:10px;padding:3px 8px;border:1px solid var(--border2);background:transparent;color:var(--mid);cursor:pointer;border-radius:var(--r)}
+.sm-btn:hover{border-color:var(--amber);color:var(--amber)}
+#pf-search{font-family:var(--mono);font-size:11px;width:100%;background:var(--bg2);border:none;border-bottom:1px solid var(--border);color:var(--white);padding:8px 12px;outline:none}
+#pf-search::placeholder{color:var(--dim)}
+#pf-body{flex:1;overflow-y:auto}
+
+/* field groups */
+.fg{border-bottom:1px solid var(--border)}
+.fg-hdr{padding:7px 12px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none}
+.fg-hdr:hover{background:var(--bg2);color:var(--base)}
+.fg-hdr.active-grp{color:var(--amber)}
+.fg-chv{font-size:9px;transition:transform .15s}
+.fg.open .fg-chv{transform:rotate(90deg)}
+.fg-body{display:none;padding:4px 0 6px}
+.fg.open .fg-body{display:block}
+
+/* individual field rows */
+.field-row{display:flex;align-items:flex-start;gap:8px;padding:5px 12px 5px 10px;cursor:pointer;border-left:2px solid transparent}
+.field-row:hover{background:var(--bg2)}
+.field-row.selected{border-left-color:var(--amber);background:var(--amber-bg)}
+.field-row.unavail{opacity:.4;cursor:not-allowed}
+.fr-check{width:13px;height:13px;border:1px solid var(--border2);flex-shrink:0;margin-top:1px;border-radius:2px;display:flex;align-items:center;justify-content:center;transition:all .1s}
+.field-row.selected .fr-check{background:var(--amber);border-color:var(--amber)}
+.fr-check::after{content:"";display:none}
+.field-row.selected .fr-check::after{display:block;width:5px;height:5px;background:var(--bg1);clip-path:polygon(14% 44%,0 65%,50% 100%,100% 16%,80% 0%,43% 62%)}
+.fr-info{flex:1;min-width:0}
+.fr-label{font-size:11px;color:var(--bright);line-height:1.3}
+.fr-meta{font-size:10px;color:var(--muted);margin-top:1px;line-height:1.3}
+.fr-src{font-family:var(--mono);font-size:9px;padding:1px 5px;border-radius:2px;display:inline-block;margin-top:3px}
+.src-roll{background:rgba(232,160,48,.12);color:var(--amber);border:1px solid rgba(232,160,48,.2)}
+.src-gtfs{background:rgba(64,128,192,.12);color:var(--blue);border:1px solid rgba(64,128,192,.2)}
+.src-ckan{background:rgba(61,158,90,.12);color:var(--green);border:1px solid rgba(61,158,90,.2)}
+.src-computed{background:rgba(136,136,136,.1);color:var(--mid);border:1px solid var(--border2)}
+.src-unavail{background:rgba(192,64,64,.08);color:#c07060;border:1px solid rgba(192,64,64,.2)}
+
+/* ── RIGHT PANEL: DATA ── */
+#panel-data{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* filter bar */
+#filter-bar{flex-shrink:0;border-bottom:1px solid var(--border);background:var(--bg1);display:flex;align-items:center;gap:0;overflow-x:auto;min-height:36px}
+#filter-bar::-webkit-scrollbar{height:3px}
+#filter-bar::-webkit-scrollbar-thumb{background:var(--border2)}
+.fb-chip{display:flex;align-items:center;gap:5px;padding:0 10px;height:36px;border-right:1px solid var(--border);font-family:var(--mono);font-size:10px;white-space:nowrap;cursor:pointer;color:var(--muted)}
+.fb-chip:hover{background:var(--bg2);color:var(--base)}
+.fb-chip.has-val{color:var(--amber)}
+.fb-chip .chip-x{color:var(--muted);margin-left:3px}
+.fb-chip .chip-x:hover{color:var(--red)}
+#fb-clear{padding:0 10px;height:36px;font-family:var(--mono);font-size:10px;color:var(--muted);cursor:pointer;border:none;background:transparent;margin-left:auto;border-left:1px solid var(--border)}
+#fb-clear:hover{color:var(--red)}
+#fb-sort{padding:0 10px;height:36px;display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;border-left:1px solid var(--border);border-right:1px solid var(--border)}
+#fb-sort select{font-family:var(--mono);font-size:10px;background:transparent;border:none;color:var(--base);outline:none;cursor:pointer}
+
+/* results bar */
+#results-bar{height:28px;flex-shrink:0;display:flex;align-items:center;padding:0 12px;gap:12px;border-bottom:1px solid var(--border);background:var(--bg)}
+.rb-stat{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.rb-stat strong{color:var(--base)}
+.rb-spacer{flex:1}
+.rb-pg{display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:10px;color:var(--muted)}
+.pg-btn{width:20px;height:20px;border:1px solid var(--border);background:transparent;color:var(--mid);cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;border-radius:var(--r)}
+.pg-btn:hover:not(:disabled){border-color:var(--amber);color:var(--amber)}
+.pg-btn:disabled{opacity:.3;cursor:not-allowed}
+
+/* main table area */
+#results-area{flex:1;overflow:auto;font-family:var(--mono)}
+#results-area::-webkit-scrollbar{width:5px;height:5px}
+#results-area::-webkit-scrollbar-thumb{background:var(--border2)}
+
+/* property cards */
+.prop-card{border-bottom:1px solid var(--border);transition:background .08s}
+.prop-card:hover{background:var(--bg1)}
+.prop-card.expanded{background:var(--bg1)}
+.pc-header{display:grid;align-items:center;gap:0;padding:0;cursor:pointer;min-height:44px}
+.pc-addr{padding:8px 12px;border-right:1px solid var(--border);min-width:0}
+.pc-addr-main{font-size:12px;color:var(--white);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc-addr-sub{font-size:10px;color:var(--muted);margin-top:1px}
+.pc-field{padding:7px 10px;border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;min-width:0}
+.pc-field-val{font-size:11px;color:var(--bright);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc-field-lbl{font-size:9px;color:var(--muted);margin-top:2px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.pc-field.hi .pc-field-val{color:var(--amber)}
+.pc-field.good .pc-field-val{color:var(--green)}
+.pc-field.warn .pc-field-val{color:#c08040}
+.pc-toggle{width:32px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:10px;cursor:pointer;padding:0 8px;align-self:stretch}
+.prop-card.expanded .pc-toggle{color:var(--amber)}
+
+/* expanded detail */
+.pc-detail{padding:0;border-top:1px solid var(--border)}
+.detail-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0}
+.detail-section{border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:12px}
+.detail-section:last-child{border-right:none}
+.ds-title{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+.ds-row{display:flex;justify-content:space-between;align-items:baseline;padding:3px 0;gap:8px;border-bottom:1px solid rgba(46,46,46,.5)}
+.ds-row:last-child{border-bottom:none}
+.ds-key{font-size:10px;color:var(--muted);flex-shrink:0}
+.ds-val{font-size:10px;color:var(--bright);text-align:right;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ds-val.em{color:var(--white);font-weight:500}
+.ds-val.amber{color:var(--amber)}
+.ds-val.green{color:var(--green)}
+.ds-val.red{color:var(--red)}
+.ds-src{font-size:9px;color:var(--dim);margin-top:6px;padding-top:5px;border-top:1px solid var(--border);line-height:1.4}
+.badge{font-family:var(--mono);font-size:9px;padding:1px 5px;border-radius:2px;display:inline-block}
+.b-live{background:var(--green-bg);color:var(--green);border:1px solid rgba(61,158,90,.3)}
+.b-est{background:var(--amber-bg);color:var(--amber);border:1px solid rgba(232,160,48,.25)}
+.b-no{background:var(--bg3);color:var(--muted);border:1px solid var(--border)}
+.signal-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.sig-chip{font-size:9px;padding:2px 6px;border-radius:2px;border:1px solid}
+.sig-on{background:var(--amber-bg);color:var(--amber);border-color:rgba(232,160,48,.3)}
+.sig-off{background:var(--bg3);color:var(--dim);border-color:var(--border)}
+
+/* empty / loading states */
+.state-msg{padding:48px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.state-msg .big{font-size:32px;margin-bottom:12px;color:var(--border2)}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--amber);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* filter popover */
+.fb-pop{position:fixed;background:var(--bg1);border:1px solid var(--border2);z-index:500;padding:0;min-width:220px;box-shadow:0 4px 20px rgba(0,0,0,.6)}
+.pop-title{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);padding:9px 12px;border-bottom:1px solid var(--border)}
+.pop-body{padding:10px 12px}
+.pop-body input[type=text],.pop-body input[type=number],.pop-body select{width:100%;font-family:var(--mono);font-size:11px;background:var(--bg2);border:1px solid var(--border2);color:var(--white);padding:6px 8px;outline:none;border-radius:var(--r)}
+.pop-body input:focus,.pop-body select:focus{border-color:var(--amber)}
+.pop-row{display:flex;gap:6px;margin-bottom:6px}
+.pop-row label{font-size:10px;color:var(--muted);display:block;margin-bottom:3px}
+.pop-row > div{flex:1}
+.pop-check{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--base);padding:4px 0;cursor:pointer}
+.pop-check input{accent-color:var(--amber)}
+.pop-footer{padding:8px 12px;border-top:1px solid var(--border);display:flex;gap:6px;justify-content:flex-end}
+.pop-apply{font-family:var(--mono);font-size:10px;padding:4px 12px;background:var(--amber);border:none;color:var(--bg);cursor:pointer;border-radius:var(--r)}
+.pop-reset{font-family:var(--mono);font-size:10px;padding:4px 10px;background:transparent;border:1px solid var(--border2);color:var(--muted);cursor:pointer;border-radius:var(--r)}
+.pop-reset:hover{color:var(--red);border-color:var(--red)}
+
+/* valuation breakdown */
+.val-methods{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:6px 0}
+.vm-box{background:var(--bg2);border:1px solid var(--border);padding:7px;border-radius:var(--r)}
+.vm-tag{font-size:9px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+.vm-val{font-family:var(--mono);font-size:12px;color:var(--white);font-weight:500}
+.vm-sub{font-size:9px;color:var(--muted);margin-top:2px}
+
+/* scrollbar */
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:var(--bg1)}::-webkit-scrollbar-thumb{background:var(--border2)}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header id="top">
+  <div class="t-logo">PROPINTEL · MTL</div>
+  <div id="t-search-wrap">
+    <input id="t-search" type="text" placeholder="Search address…" autocomplete="off"/>
+    <div id="t-sugg"></div>
+  </div>
+  <div class="t-status">
+    <span class="dot wait" id="dot"></span>
+    <span id="status-lbl">Connecting…</span>
+  </div>
+  <div id="t-counts"></div>
+  <div class="t-spacer"></div>
+</header>
+
+<!-- BODY -->
+<div id="body">
+
+  <!-- LEFT: FIELD SELECTOR -->
+  <aside id="panel-fields">
+    <div id="pf-head">
+      <div class="ph-title">Data Fields</div>
+      <div class="ph-sub">Select fields to display as columns. Filters apply only to selected fields.</div>
+      <div class="ph-actions">
+        <button class="sm-btn" onclick="selectAllFields(true)">All</button>
+        <button class="sm-btn" onclick="selectAllFields(false)">None</button>
+        <button class="sm-btn" onclick="selectDefaultFields()">Default</button>
+      </div>
+    </div>
+    <input id="pf-search" type="text" placeholder="Search fields…" oninput="filterFieldList(this.value)"/>
+    <div id="pf-body"></div>
+  </aside>
+
+  <!-- RIGHT: DATA -->
+  <div id="panel-data">
+
+    <!-- ACTIVE FILTERS -->
+    <div id="filter-bar">
+      <div id="fb-sort">
+        <span style="color:var(--muted)">Sort:</span>
+        <select id="sort-sel" onchange="S.sort=this.value;S.page=0;fetchPage()">
+          <option value="id">Default</option>
+          <option value="addr_asc">Address A→Z</option>
+          <option value="addr_desc">Address Z→A</option>
+          <option value="year_asc">Year (oldest first)</option>
+          <option value="year_desc">Year (newest first)</option>
+          <option value="units_desc">Units (most first)</option>
+          <option value="units_asc">Units (fewest first)</option>
+          <option value="lot_desc">Lot m² (largest)</option>
+          <option value="lot_asc">Lot m² (smallest)</option>
+          <option value="bldg_desc">Building m² (largest)</option>
+          <option value="permit_desc">Permits (most)</option>
+          <option value="val_price_desc">Est. value (high)</option>
+          <option value="val_price_asc">Est. value (low)</option>
+        </select>
+      </div>
+      <div id="chips-area"><!-- filter chips go here --></div>
+      <button id="fb-clear" onclick="clearAllFilters()">Clear filters</button>
+    </div>
+
+    <!-- RESULTS COUNT -->
+    <div id="results-bar">
+      <span class="rb-stat" id="rb-total">—</span>
+      <span class="rb-stat" id="rb-geocoded"></span>
+      <div class="rb-spacer"></div>
+      <div class="rb-pg">
+        <button class="pg-btn" id="btn-prev" disabled onclick="S.page--;fetchPage()">←</button>
+        <span id="rb-page">—</span>
+        <button class="pg-btn" id="btn-next" disabled onclick="S.page++;fetchPage()">→</button>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="results-area">
+      <div class="state-msg" id="state-empty" style="display:none">
+        <div class="big">∅</div>No properties match the current filters.
+      </div>
+      <div class="state-msg" id="state-loading">
+        <span class="spinner"></span>Loading…
+      </div>
+      <div id="prop-list" style="display:none"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const API = "http://localhost:8000";
+const PAGE_SIZE = 50;
+
+// ── FIELD DEFINITIONS ─────────────────────────────────────────────────────────
+// Every field has: id, label, desc, source (for badge), srcClass, group,
+//   defaultOn, unavail (not in open data), filterType, unit
+const FIELDS = [
+  // IDENTITY
+  {id:"address",      label:"Address",          desc:"Street number + name from assessment roll",
+   source:"Roll",srcClass:"src-roll",  group:"Identity",   defaultOn:true,  filterType:"text"},
+  {id:"borough",      label:"Borough",          desc:"Derived from MUNICIPALITE field in CSV",
+   source:"Roll",srcClass:"src-roll",  group:"Identity",   defaultOn:true,  filterType:"select"},
+  {id:"matricule",    label:"Matricule",         desc:"83-char unique Quebec property ID",
+   source:"Roll",srcClass:"src-roll",  group:"Identity",   defaultOn:false},
+  {id:"categorie",    label:"Category",          desc:"REG (regular) or CON (condominium)",
+   source:"Roll",srcClass:"src-roll",  group:"Identity",   defaultOn:false},
+
+  // PHYSICAL
+  {id:"use_type",     label:"Use type",          desc:"LIBELLE_UTILISATION from assessment roll",
+   source:"Roll",srcClass:"src-roll",  group:"Physical",   defaultOn:true,  filterType:"select"},
+  {id:"cubf_code",    label:"CUBF code",         desc:"4-digit Quebec land use code",
+   source:"Roll",srcClass:"src-roll",  group:"Physical",   defaultOn:false},
+  {id:"year_built",   label:"Year built",        desc:"ANNEE_CONSTRUCTION",
+   source:"Roll",srcClass:"src-roll",  group:"Physical",   defaultOn:true,  filterType:"range", unit:""},
+  {id:"nb_logements", label:"Units",             desc:"NOMBRE_LOGEMENT — residential units",
+   source:"Roll",srcClass:"src-roll",  group:"Physical",   defaultOn:true,  filterType:"range", unit:""},
+  {id:"nb_etages",    label:"Floors",            desc:"ETAGE_HORS_SOL — above-ground floors",
+   source:"Roll",srcClass:"src-roll",  group:"Physical",   defaultOn:true,  filterType:"range", unit:""},
+  {id:"lot_m2",       label:"Lot m²",            desc:"SUPERFICIE_TERRAIN",
+   source:"Roll",srcClass:"src-roll",  group:"Physical",   defaultOn:true,  filterType:"range", unit:"m²"},
+  {id:"bldg_m2",      label:"Building m²",       desc:"SUPERFICIE_BATIMENT",
+   source:"Roll",srcClass:"src-roll",  group:"Physical",   defaultOn:false, filterType:"range", unit:"m²"},
+
+  // VALUATION
+  {id:"val_est",      label:"Est. market value", desc:"Blended: QPAREB Q4 2025 medians + income (CMHC rents) + cost approach. ±15% when borough data available, ±25% island fallback.",
+   source:"Computed",srcClass:"src-computed",group:"Valuation",defaultOn:true, filterType:"range", unit:"$"},
+  {id:"val_low",      label:"Value — low",       desc:"Lower bound of estimate range",
+   source:"Computed",srcClass:"src-computed",group:"Valuation",defaultOn:false},
+  {id:"val_high",     label:"Value — high",      desc:"Upper bound of estimate range",
+   source:"Computed",srcClass:"src-computed",group:"Valuation",defaultOn:false},
+  {id:"val_method",   label:"Valuation method",  desc:"Which blend of methods was used",
+   source:"Computed",srcClass:"src-computed",group:"Valuation",defaultOn:false},
+  {id:"assessed_val", label:"Assessed value",    desc:"Official municipal assessed value. Not in open CSV — look up on Evalweb using the matricule.",
+   source:"Evalweb",srcClass:"src-unavail",group:"Valuation",defaultOn:false,unavail:true},
+  {id:"last_sale",    label:"Last sale price",   desc:"Actual transaction price from Registre foncier. Requires JLR or Nominis subscription.",
+   source:"JLR/Nominis",srcClass:"src-unavail",group:"Valuation",defaultOn:false,unavail:true},
+
+  // TRANSIT
+  {id:"nearest_metro",      label:"Nearest metro station",  desc:"Name of closest STM metro stop (deduplicated by station)",
+   source:"STM GTFS",srcClass:"src-gtfs",group:"Transit",defaultOn:true},
+  {id:"metro_dist",         label:"Metro distance",         desc:"Metres to nearest metro station",
+   source:"STM GTFS",srcClass:"src-gtfs",group:"Transit",defaultOn:true,  filterType:"range",unit:"m"},
+  {id:"nearest_hfreq_bus",  label:"High-freq bus stop",     desc:"Nearest bus stop on routes with 100+ trips/weekday",
+   source:"STM GTFS",srcClass:"src-gtfs",group:"Transit",defaultOn:false},
+  {id:"bus_dist",           label:"High-freq bus distance",  desc:"Metres to nearest high-frequency bus stop",
+   source:"STM GTFS",srcClass:"src-gtfs",group:"Transit",defaultOn:false, filterType:"range",unit:"m"},
+  {id:"nearest_rem",        label:"Nearest REM station",    desc:"Closest of 22 REM stations",
+   source:"rem.info",srcClass:"src-gtfs",group:"Transit",defaultOn:false},
+  {id:"rem_dist",           label:"REM distance",           desc:"Metres to nearest REM station",
+   source:"rem.info",srcClass:"src-gtfs",group:"Transit",defaultOn:false, filterType:"range",unit:"m"},
+
+  // PARKS
+  {id:"nearest_park",       label:"Nearest park",           desc:"Closest of 1,495 Montreal parks",
+   source:"CKAN",srcClass:"src-ckan",  group:"Parks & Green",defaultOn:false},
+  {id:"park_dist",          label:"Park distance",          desc:"Metres to nearest park polygon centroid",
+   source:"CKAN",srcClass:"src-ckan",  group:"Parks & Green",defaultOn:true,  filterType:"range",unit:"m"},
+  {id:"parks_500m",         label:"Parks within 500m",      desc:"Count of park polygons",
+   source:"CKAN",srcClass:"src-ckan",  group:"Parks & Green",defaultOn:false},
+
+  // FACILITIES
+  {id:"nearest_facility",   label:"Nearest public facility",desc:"Libraries, arenas, community centres",
+   source:"CKAN",srcClass:"src-ckan",  group:"Facilities",  defaultOn:false},
+  {id:"facility_dist",      label:"Facility distance",      desc:"Metres to nearest public facility",
+   source:"CKAN",srcClass:"src-ckan",  group:"Facilities",  defaultOn:false, filterType:"range",unit:"m"},
+  {id:"facilities_1km",     label:"Facilities within 1km",  desc:"Count — 3+ is good amenity access",
+   source:"CKAN",srcClass:"src-ckan",  group:"Facilities",  defaultOn:false},
+  {id:"nearest_library",    label:"Nearest library",        desc:"Public library name",
+   source:"CKAN",srcClass:"src-ckan",  group:"Facilities",  defaultOn:false},
+
+  // COMMERCIAL
+  {id:"commercial_500m",    label:"Commercial premises 500m",desc:"Ground-floor units (2024 survey)",
+   source:"CKAN",srcClass:"src-ckan",  group:"Commercial",  defaultOn:false},
+  {id:"vacant_200m",        label:"Vacant storefronts 200m", desc:"Vacant commercial units — sign of area decline",
+   source:"CKAN",srcClass:"src-ckan",  group:"Commercial",  defaultOn:false},
+  {id:"poi_500m",           label:"POI within 500m",         desc:"Cultural, sports, service points of interest",
+   source:"CKAN",srcClass:"src-ckan",  group:"Commercial",  defaultOn:false},
+
+  // PERMITS
+  {id:"permit_count",       label:"Permit records",          desc:"Matched to property street — not just this address",
+   source:"Permits",srcClass:"src-ckan",group:"Permits",    defaultOn:true},
+  {id:"has_demolition",     label:"Demolition permit",       desc:"Demolition category present in matched permits",
+   source:"Permits",srcClass:"src-ckan",group:"Permits",    defaultOn:false, filterType:"bool"},
+  {id:"has_recent_const",   label:"Recent construction",     desc:"Construction permit 2020+ in matched permits",
+   source:"Permits",srcClass:"src-ckan",group:"Permits",    defaultOn:false, filterType:"bool"},
+
+  // DISTRESS — all unavailable without Registre foncier
+  {id:"pre_exercise",       label:"Pre-exercise notice",     desc:"Lender's first step before forced sale — strongest motivated-seller signal. Requires JLR or Nominis.",
+   source:"JLR/Nominis",srcClass:"src-unavail",group:"Distress Signals",defaultOn:false,unavail:true},
+  {id:"succession",         label:"Succession/inherited",    desc:"Inherited transfer — heirs often motivated to sell. Requires JLR or Nominis.",
+   source:"JLR/Nominis",srcClass:"src-unavail",group:"Distress Signals",defaultOn:false,unavail:true},
+  {id:"tax_arrears",        label:"Tax arrears",             desc:"Municipal tax delinquency. Requires city integration.",
+   source:"City (n/a)",srcClass:"src-unavail",group:"Distress Signals",defaultOn:false,unavail:true},
+];
+
+const FIELD_MAP = Object.fromEntries(FIELDS.map(f=>[f.id,f]));
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+const S = {
+  selected: new Set(FIELDS.filter(f=>f.defaultOn&&!f.unavail).map(f=>f.id)),
+  filters: {},     // fieldId → {type, value(s)}
+  sort: "id",
+  page: 0, totalPages: 1, total: 0,
+  data: [],
+  ok: false,
+  expanded: null,
+  boroughs: [],
+  useTypes: [],
+  _searchT: null,
+  suggR: [],
+};
+let suggIdx = -1;
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+const ge = id => document.getElementById(id);
+const fmtC = n => n ? new Intl.NumberFormat("en-CA",{style:"currency",currency:"CAD",maximumFractionDigits:0}).format(n) : "—";
+const fmtN = n => (n===null||n===undefined||n==="") ? "—" : new Intl.NumberFormat("en-CA",{maximumFractionDigits:0}).format(n);
+const fmtD = m => !m ? "—" : m>=1000 ? `${(m/1000).toFixed(1)} km` : `${m} m`;
+const fmtV = (f, row) => {
+  const v = getPropVal(f.id, row);
+  if (v===null||v===undefined||v==="") return "—";
+  if (f.unit==="$") return fmtC(v);
+  if (f.unit==="m²") return fmtN(v)+" m²";
+  if (f.unit==="m") return fmtD(v);
+  if (typeof v === "boolean") return v ? "Yes" : "No";
+  return String(v);
+};
+
+// Map field id to actual property key
+function getPropVal(fid, row) {
+  const map = {
+    address: "address", borough: "borough", matricule: "matricule",
+    categorie: "categorie", use_type: "use_type", cubf_code: "cubf_code",
+    year_built: "year_built", nb_logements: "nb_logements", nb_etages: "nb_etages",
+    lot_m2: "superficie_terrain_m2", bldg_m2: "superficie_batiment_m2",
+    val_est: r=>r.valuation?.estimated, val_low: r=>r.valuation?.low, val_high: r=>r.valuation?.high,
+    val_method: r=>r.valuation?.method,
+    nearest_metro: "nearest_metro", metro_dist: "nearest_metro_dist_m",
+    nearest_hfreq_bus: "nearest_hfreq_bus", bus_dist: "nearest_hfreq_bus_dist_m",
+    nearest_rem: "nearest_rem", rem_dist: "nearest_rem_dist_m",
+    nearest_park: "nearest_park", park_dist: "nearest_park_dist_m",
+    parks_500m: "parks_500m",
+    nearest_facility: "nearest_facility", facility_dist: "nearest_facility_dist_m",
+    facilities_1km: "facilities_1km", nearest_library: "nearest_library",
+    commercial_500m: "commercial_500m", vacant_200m: "vacant_commercial_200m",
+    poi_500m: "poi_500m",
+    permit_count: "permit_count",
+    has_demolition: r => r.signals?.demolitionpermit === true,
+    has_recent_const: r => r.signals?.recentconstruction === true,
+  };
+  const key = map[fid];
+  if (!key) return null;
+  if (typeof key === "function") return key(row);
+  return row[key];
+}
+
+function colClass(fid, row) {
+  const v = getPropVal(fid, row);
+  if (fid==="metro_dist"||fid==="park_dist"||fid==="facility_dist"||fid==="rem_dist"||fid==="bus_dist") {
+    if (!v) return "";
+    if (v <= 300) return "good"; if (v <= 800) return ""; return "warn";
+  }
+  if (fid==="val_est") return v ? "hi" : "";
+  if (fid==="permit_count") return v>0 ? "hi" : "";
+  if (fid==="has_demolition"||fid==="has_recent_const") return v===true ? "hi" : "";
+  if (fid==="nb_logements") return (v||0)>=4 ? "good" : "";
+  return "";
+}
+
+// ── FIELD PANEL RENDER ────────────────────────────────────────────────────────
+const GROUPS = [...new Set(FIELDS.map(f=>f.group))];
+
+function renderFieldPanel(query="") {
+  const ql = query.toLowerCase().trim();
+  const body = ge("pf-body");
+  body.innerHTML = "";
+
+  GROUPS.forEach(grp => {
+    const gf = FIELDS.filter(f => {
+      if (ql && !f.label.toLowerCase().includes(ql) && !f.desc.toLowerCase().includes(ql) && !grp.toLowerCase().includes(ql)) return false;
+      return true;
+    });
+    if (!gf.length) return;
+
+    const isOpen = !!ql;  // collapsed by default; open all when searching
+    const anySelected = gf.some(f=>S.selected.has(f.id));
+
+    const gDiv = document.createElement("div");
+    gDiv.className = "fg" + (isOpen ? " open" : "");
+    gDiv.innerHTML = `<div class="fg-hdr ${anySelected?"active-grp":""}">
+      <span>${grp}</span>
+      <span class="fg-chv">›</span>
+    </div>
+    <div class="fg-body"></div>`;
+
+    gDiv.querySelector(".fg-hdr").onclick = () => gDiv.classList.toggle("open");
+
+    const gBody = gDiv.querySelector(".fg-body");
+    gf.forEach(f => {
+      const sel = S.selected.has(f.id);
+      const row = document.createElement("div");
+      row.className = `field-row ${sel?"selected":""} ${f.unavail?"unavail":""}`;
+      row.title = f.unavail ? "Not available in open data" : f.desc;
+      row.innerHTML = `
+        <div class="fr-check"></div>
+        <div class="fr-info">
+          <div class="fr-label">${f.label}</div>
+          <div class="fr-meta">${f.desc.length > 60 ? f.desc.slice(0,60)+"…" : f.desc}</div>
+          <span class="fr-src ${f.srcClass}">${f.source}</span>
+          ${S.filters[f.id] ? `<span class="fr-src src-computed" style="margin-left:4px">filtered</span>` : ""}
+        </div>`;
+      if (!f.unavail) {
+        row.onclick = () => { toggleField(f.id); renderFieldPanel(ge("pf-search").value); renderHeaders(); };
+      }
+      gBody.appendChild(row);
+    });
+    body.appendChild(gDiv);
+  });
+}
+
+function filterFieldList(q) { renderFieldPanel(q); }
+
+function toggleField(fid) {
+  if (S.selected.has(fid)) { S.selected.delete(fid); delete S.filters[fid]; renderChips(); }
+  else S.selected.add(fid);
+  renderResults();
+}
+
+function selectAllFields(on) {
+  if (on) FIELDS.filter(f=>!f.unavail).forEach(f=>S.selected.add(f.id));
+  else { S.selected.clear(); S.filters = {}; renderChips(); }
+  renderFieldPanel(ge("pf-search").value);
+  renderResults();
+}
+
+function selectDefaultFields() {
+  S.selected.clear(); S.filters = {};
+  FIELDS.filter(f=>f.defaultOn&&!f.unavail).forEach(f=>S.selected.add(f.id));
+  renderFieldPanel(ge("pf-search").value);
+  renderChips();
+  renderResults();
+}
+
+// ── COLUMN HEADERS (computed from selected fields) ────────────────────────────
+function getColumns() {
+  return FIELDS.filter(f=>S.selected.has(f.id)&&!f.unavail);
+}
+
+// Build grid-template-columns string
+function getGridTemplate(cols) {
+  const addr = "240px";
+  const toggle = "32px";
+  const colW = cols.map(f => {
+    if (f.id==="address") return null; // handled separately
+    if (f.unit==="$") return "130px";
+    if (f.unit==="m") return "90px";
+    if (f.unit==="m²") return "90px";
+    if (f.id==="nearest_metro"||f.id==="nearest_rem"||f.id==="nearest_hfreq_bus"||f.id==="nearest_park"||f.id==="nearest_facility"||f.id==="nearest_library"||f.id==="borough"||f.id==="use_type") return "minmax(120px,1fr)";
+    if (f.filterType==="bool") return "80px";
+    return "90px";
+  }).filter(Boolean);
+  return `${addr} ${colW.join(" ")} ${toggle}`;
+}
+
+function renderHeaders() {
+  const list = ge("prop-list");
+  if (!list) return;
+  // headers rendered inline with results
+}
+
+// ── FETCH PAGE ────────────────────────────────────────────────────────────────
+async function fetchPage() {
+  if (!S.ok) return;
+  showLoading(true);
+
+  const params = new URLSearchParams({
+    page: S.page, page_size: PAGE_SIZE, sort: S.sort,
+  });
+
+  // Server-side filters from active filter state
+  const F = S.filters;
+  if (F.borough?.value) params.set("borough", F.borough.value);
+  if (F.use_type?.value) params.set("cubf", F.use_type.value);
+  if (F.nb_logements?.min) params.set("units_min", F.nb_logements.min);
+  if (F.year_built?.min) params.set("year_min", F.year_built.min);
+  if (F.year_built?.max) params.set("year_max", F.year_built.max);
+  if (F.lot_m2?.min) params.set("lot_min", F.lot_m2.min);
+  if (F.bldg_m2?.min) params.set("bldg_min", F.bldg_m2.min);
+
+  try {
+    const res = await fetch(`${API}/browse?${params}`, {signal: AbortSignal.timeout(20000)});
+    const d = await res.json();
+    S.data = d.results || [];
+    S.total = d.total || 0;
+    S.totalPages = d.pages || 1;
+    renderResults();
+  } catch(e) {
+    showLoading(false);
+    ge("state-empty").style.display = "block";
+    ge("state-empty").innerHTML = `<div class="big">!</div>Fetch error: ${e.message}`;
+  }
+}
+
+function refetch() { S.page = 0; S.expanded = null; fetchPage(); }
+
+// Client-side filter pass
+function clientFilter(rows) {
+  const F = S.filters;
+  return rows.filter(row => {
+    for (const [fid, filt] of Object.entries(F)) {
+      if (!filt || !S.selected.has(fid)) continue;
+      const v = getPropVal(fid, row);
+      if (filt.type === "range") {
+        const n = parseFloat(v);
+        if (filt.min && !isNaN(parseFloat(filt.min)) && n < parseFloat(filt.min)) return false;
+        if (filt.max && !isNaN(parseFloat(filt.max)) && n > parseFloat(filt.max)) return false;
+      }
+      if (filt.type === "text" && filt.value) {
+        if (!String(v||"").toLowerCase().includes(filt.value.toLowerCase())) return false;
+      }
+      if (filt.type === "bool" && filt.value !== undefined && filt.value !== "") {
+        const want = filt.value === "true";
+        if (Boolean(v) !== want) return false;
+      }
+    }
+    return true;
+  });
+}
+
+// ── RENDER RESULTS ────────────────────────────────────────────────────────────
+function renderResults() {
+  const cols = getColumns().filter(f=>f.id!=="address");
+  const grid = `240px ${cols.map(f=>{
+    if(f.unit==="$")return"130px";if(f.unit==="m")return"90px";if(f.unit==="m²")return"90px";
+    if(["nearest_metro","nearest_rem","nearest_hfreq_bus","nearest_park","nearest_facility","nearest_library","borough","use_type"].includes(f.id))return"minmax(100px,1fr)";
+    if(f.filterType==="bool")return"75px";return"90px";
+  }).join(" ")} 32px`;
+
+  const rows = clientFilter(S.data);
+  showLoading(false);
+
+  // Update stats
+  const geocodedN = rows.filter(r=>r.geocoded).length;
+  ge("rb-total").innerHTML = `<strong>${S.total.toLocaleString()}</strong> total · <strong>${rows.length}</strong> on page`;
+  ge("rb-geocoded").innerHTML = rows.length > 0 ? `${geocodedN}/${rows.length} precisely geocoded` : "";
+  ge("rb-page").textContent = `${S.page+1} / ${S.totalPages}`;
+  ge("btn-prev").disabled = S.page === 0;
+  ge("btn-next").disabled = S.page >= S.totalPages - 1;
+
+  if (!rows.length) {
+    ge("state-empty").style.display = "block";
+    ge("state-empty").innerHTML = `<div class="big">∅</div>No properties match.`;
+    ge("prop-list").style.display = "none";
+    return;
+  }
+
+  ge("state-empty").style.display = "none";
+  ge("prop-list").style.display = "block";
+  const list = ge("prop-list");
+
+  // Sort key mapping: field id → [asc_key, desc_key]
+  const SORT_KEYS = {
+    address:      ["addr_asc",       "addr_desc"],
+    borough:      ["addr_asc",       "addr_desc"],
+    year_built:   ["year_asc",       "year_desc"],
+    nb_logements: ["units_asc",      "units_desc"],
+    lot_m2:       ["lot_asc",        "lot_desc"],
+    bldg_m2:      ["bldg_asc",       "bldg_desc"],
+    val_est:      ["val_price_asc",  "val_price_desc"],
+    metro_dist:   ["addr_asc",       "addr_desc"],   // no server sort for distance
+    park_dist:    ["addr_asc",       "addr_desc"],
+    permit_count: ["permit_asc",     "permit_desc"],
+  };
+
+  function colSortIcon(fid) {
+    const keys = SORT_KEYS[fid];
+    if (!keys) return "";
+    if (S.sort === keys[1]) return " ↓";
+    if (S.sort === keys[0]) return " ↑";
+    return "";
+  }
+
+  function colSortColor(fid) {
+    const keys = SORT_KEYS[fid];
+    if (!keys) return S.filters[fid] ? "var(--amber)" : "var(--muted)";
+    if (S.sort === keys[0] || S.sort === keys[1]) return "var(--amber)";
+    return S.filters[fid] ? "var(--amber)" : "var(--muted)";
+  }
+
+  function headerClick(fid, el, event) {
+    // Shift+click or if no sort key → open filter
+    const keys = SORT_KEYS[fid];
+    if (!keys || event.shiftKey) { openFilterPop(fid, el); return; }
+    // Toggle sort: none → desc → asc → none
+    if (S.sort === keys[1]) S.sort = keys[0];
+    else if (S.sort === keys[0]) S.sort = "id";
+    else S.sort = keys[1];
+    // Update sort dropdown to match
+    const sel = ge("sort-sel");
+    if (sel) sel.value = S.sort;
+    S.page = 0;
+    fetchPage();
+  }
+
+  // Header row
+  let html = `<div style="display:grid;grid-template-columns:${grid};border-bottom:1px solid var(--border2);background:var(--bg1);position:sticky;top:0;z-index:10">
+    <div onclick="headerClick('address',this,event)" style="padding:6px 12px;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:${colSortColor("address")};border-right:1px solid var(--border);cursor:pointer;user-select:none" title="Click to sort · Shift+click to filter">Address${colSortIcon("address")}</div>
+    ${cols.map(f=>`<div onclick="headerClick('${f.id}',this,event)" style="padding:6px 10px;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:${colSortColor(f.id)};border-right:1px solid var(--border);cursor:pointer;user-select:none" title="${SORT_KEYS[f.id]?"Click to sort · Shift+click to filter":"Click to filter"} · ${f.source}">${f.label}${colSortIcon(f.id)}${S.filters[f.id]?" ▾":""}</div>`).join("")}
+    <div style="width:32px;border-right:none"></div>
+  </div>`;
+
+  rows.forEach((row, i) => {
+    const rank = S.page * PAGE_SIZE + i + 1;
+    const isExp = S.expanded === row.id;
+    const gc = row.geocoded;
+
+    html += `<div class="prop-card ${isExp?"expanded":""}" data-id="${row.id}">
+      <div class="pc-header" style="display:grid;grid-template-columns:${grid}" onclick="toggleExpand(${row.id})">
+        <div class="pc-addr" style="border-right:1px solid var(--border)">
+          <div class="pc-addr-main" title="${row.address||""}">${row.address || "—"}</div>
+          <div class="pc-addr-sub">${gc?"":"⚠ centroid · "}${row.borough||""}</div>
+        </div>
+        ${cols.map(f=>{
+          const v = fmtV(f, row);
+          const cc = colClass(f.id, row);
+          return `<div class="pc-field ${cc}" style="border-right:1px solid var(--border)">
+            <div class="pc-field-val" title="${v}">${v}</div>
+          </div>`;
+        }).join("")}
+        <div class="pc-toggle">${isExp?"▲":"▼"}</div>
+      </div>
+      ${isExp ? buildDetail(row) : ""}
+    </div>`;
+  });
+
+  list.innerHTML = html;
+}
+
+// ── EXPANDED DETAIL ───────────────────────────────────────────────────────────
+function buildDetail(row) {
+  const val = row.valuation;
+  const src = label => `<div class="ds-src">${label}</div>`;
+  const row_ = (k,v,cls="") => `<div class="ds-row"><span class="ds-key">${k}</span><span class="ds-val ${cls}">${v||"—"}</span></div>`;
+
+  const sections = [];
+
+  // IDENTITY
+  sections.push(`<div class="detail-section">
+    <div class="ds-title">Identity <span class="badge b-live">Assessment roll</span></div>
+    ${row_(  "Matricule",    row.matricule||"—")}
+    ${row_(  "Address",      row.address||"—","em")}
+    ${row_(  "Borough",      row.borough||"—")}
+    ${row_(  "Category",     row.categorie||"—")}
+    ${row_(  "Use type",     row.use_type||"—")}
+    ${row_(  "CUBF code",    row.cubf_code||"—")}
+    ${row_(  "Geocoded",     row.geocoded?"Precise address":"⚠ Borough centroid — proximity data approximate", row.geocoded?"green":"amber")}
+    ${src("Source: Rôle d'évaluation foncière 2026-2028 · donnees.montreal.ca")}
+  </div>`);
+
+  // PHYSICAL
+  sections.push(`<div class="detail-section">
+    <div class="ds-title">Physical <span class="badge b-live">Assessment roll</span></div>
+    ${row_("Year built",    row.year_built||"—")}
+    ${row_("Floors",        row.nb_etages||"—")}
+    ${row_("Dwelling units",row.nb_logements||"—")}
+    ${row_("Lot area",      row.superficie_terrain_m2 ? fmtN(row.superficie_terrain_m2)+" m²" : "—")}
+    ${row_("Building area", row.superficie_batiment_m2 ? fmtN(row.superficie_batiment_m2)+" m²" : "—")}
+    ${src("Source: Rôle d'évaluation foncière · CIVIQUE_DEBUT, ANNEE_CONSTRUCTION, NOMBRE_LOGEMENT, SUPERFICIE_TERRAIN, SUPERFICIE_BATIMENT")}
+  </div>`);
+
+  // VALUATION
+  const vSrc = val?.data_source || "—";
+  const vUnc = val?.uncertainty || "—";
+  const vCal = val?.has_borough_data;
+  sections.push(`<div class="detail-section">
+    <div class="ds-title">Valuation <span class="badge ${vCal?"b-est":"b-no"}">${vCal?"Borough data":"Island fallback"}</span></div>
+    ${val?.estimated ? `
+      <div style="margin-bottom:8px">
+        <div style="font-family:var(--mono);font-size:18px;color:var(--white);font-weight:500">${fmtC(val.estimated)}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">${fmtC(val.low)} – ${fmtC(val.high)} &nbsp;${vUnc}</div>
+      </div>
+      <div class="val-methods">
+        <div class="vm-box"><div class="vm-tag">A · Comparable</div><div class="vm-val">${fmtC(val.method_a_comparable)}</div><div class="vm-sub">QPAREB ${val.qpareb_type} median</div></div>
+        <div class="vm-box ${val.method_b_income?"":"" }" style="${val.method_b_income?"":"opacity:.4"}"><div class="vm-tag">B · Income</div><div class="vm-val">${val.method_b_income?fmtC(val.method_b_income):"n/a"}</div><div class="vm-sub">${val.method_b_income?"CMHC rents · "+val.cap_rate+"% cap":"Needs 4+ units"}</div></div>
+        <div class="vm-box"><div class="vm-tag">C · Cost</div><div class="vm-val">${fmtC(val.method_c_cost)}</div><div class="vm-sub">Land + bldg ×${val.age_factor}</div></div>
+      </div>
+      ${row_("Blend method", val.method)}
+      ${row_("Size adj", val.size_adj ? "×"+val.size_adj : "—")}
+      ${row_("QPAREB median", fmtC(val.qpareb_median)+" ("+val.qpareb_type+")")}
+      ${row_("Market timing", "+2.5% applied (Q4 2025 → Apr 2026)")}
+    ` : `<div class="ds-row"><span class="ds-val" style="color:var(--muted)">Insufficient area data</span></div>`}
+    <div class="ds-src">Sources: QPAREB/Centris Q4 2025 borough medians · CMHC Rental Market Report 2024 · QPAREB cap rates 2024 · <a href="https://servicesenligne2.ville.montreal.qc.ca/sel/evalweb/index" target="_blank" style="color:var(--amber)">Evalweb ↗</a> for official assessed value (use matricule)</div>
+  </div>`);
+
+  // TRANSIT
+  const gcWarn = !row.geocoded ? `<div style="font-size:10px;color:var(--amber);margin-bottom:6px">⚠ Using borough centroid — distances approximate</div>` : "";
+  sections.push(`<div class="detail-section">
+    <div class="ds-title">Transit <span class="badge ${row.stm_data_live?"b-live":"b-no"}">${row.stm_data_live?"Live":"Not loaded"}</span></div>
+    ${gcWarn}
+    ${row_("Nearest metro",  row.nearest_metro||"—", row.within_500m_metro?"green":"")}
+    ${row_("Metro distance", fmtD(row.nearest_metro_dist_m), row.within_500m_metro?"green":row.nearest_metro_dist_m>1000?"amber":"")}
+    ${row_("Nearest REM",    row.nearest_rem||"—", row.within_800m_rem?"green":"")}
+    ${row_("REM distance",   fmtD(row.nearest_rem_dist_m), row.within_800m_rem?"green":"")}
+    ${row_("High-freq bus",  row.nearest_hfreq_bus||"—")}
+    ${row_("Bus distance",   fmtD(row.nearest_hfreq_bus_dist_m), row.within_300m_hfreq_bus?"green":"")}
+    ${src("STM GTFS (deduplicated by station) · rem.info bundled 22 stations")}
+  </div>`);
+
+  // PARKS & FACILITIES
+  sections.push(`<div class="detail-section">
+    <div class="ds-title">Parks &amp; Facilities <span class="badge b-live">CKAN open data</span></div>
+    ${gcWarn}
+    ${row_("Nearest park",      row.nearest_park||"—")}
+    ${row_("Park distance",     fmtD(row.nearest_park_dist_m), (row.nearest_park_dist_m||9999)<=300?"green":"")}
+    ${row_("Parks 500m",        row.parks_500m||0)}
+    ${row_("Nearest facility",  row.nearest_facility||"—")}
+    ${row_("Facility distance", fmtD(row.nearest_facility_dist_m))}
+    ${row_("Facilities 1km",    row.facilities_1km||0, (row.facilities_1km||0)>=3?"green":"")}
+    ${row_("Nearest library",   row.nearest_library||"—")}
+    ${src("espaces-verts CSV (1,495 parks) · lieux-batiments-vocation-publique CKAN")}
+  </div>`);
+
+  // COMMERCIAL
+  sections.push(`<div class="detail-section">
+    <div class="ds-title">Commercial &amp; POI <span class="badge b-live">CKAN 2024</span></div>
+    ${gcWarn}
+    ${row_("Commercial 200m",   row.commercial_200m||0)}
+    ${row_("Commercial 500m",   row.commercial_500m||0)}
+    ${row_("Vacant 200m",       row.vacant_commercial_200m||0, (row.vacant_commercial_200m||0)>=3?"amber":"")}
+    ${row_("POI 500m",          row.poi_500m||0)}
+    ${row_("Cultural POI 1km",  row.cultural_poi_1km||0)}
+    ${src("locaux-commerciaux-2024 · lieux-d-interet CKAN")}
+    ${(!row.commercial_200m && !row.commercial_500m) ? '<div class="ds-src" style="color:var(--muted)">No data — commercial survey and permits only cover the 19 arrondissements of Ville de Montréal proper, not demerged municipalities (Pointe-Claire, Westmount, Côte-Saint-Luc, etc.)</div>' : ''}
+  </div>`);
+
+  // PERMITS
+  const sigs = row.signals || {};
+  sections.push(`<div class="detail-section">
+    <div class="ds-title">Permits <span class="badge b-live">donnees.montreal.ca</span></div>
+    ${row_("Permit records",    row.permit_count||0, (row.permit_count||0)>0?"amber":"")}
+    <div class="signal-chips">
+      <span class="sig-chip ${sigs.demolitionpermit?"sig-on":"sig-off"}">Demolition</span>
+      <span class="sig-chip ${sigs.recentconstruction?"sig-on":"sig-off"}">Construction 2020+</span>
+      <span class="sig-chip ${(row.permit_count||0)>=3?"sig-on":"sig-off"}">High activity (3+)</span>
+    </div>
+    <div class="ds-src" style="margin-top:8px">
+      ${row.permit_scope==="civic+borough"
+        ? "✓ Matched by civic number ±10 + borough — near address-level precision."
+        : row.permit_scope==="borough"
+        ? "⚠ Borough + street match — all permits on this street in this arrondissement."
+        : "⚠ Street name only — may include permits from other boroughs."}
+    </div>
+    ${src("permis-construction.csv · 550,417 permits")}
+  </div>`);
+
+  // LINKS
+  sections.push(`<div class="detail-section">
+    <div class="ds-title">External links</div>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px">
+      <a href="https://servicesenligne2.ville.montreal.qc.ca/sel/evalweb/index" target="_blank" style="font-family:var(--mono);font-size:10px;color:var(--amber)">Evalweb — official assessed value ↗</a>
+      <a href="https://appli.foncier.gouv.qc.ca/infolot/" target="_blank" style="font-family:var(--mono);font-size:10px;color:var(--amber)">Infolot — cadastre ↗</a>
+      <a href="https://appli.foncier.gouv.qc.ca/rdprm/" target="_blank" style="font-family:var(--mono);font-size:10px;color:var(--amber)">Registre foncier ↗</a>
+      <a href="https://solutions.jlr.ca" target="_blank" style="font-family:var(--mono);font-size:10px;color:var(--muted)">JLR — transactions &amp; distress signals ↗</a>
+    </div>
+    <div class="ds-src" style="margin-top:8px">Use the matricule number (${row.matricule||"—"}) to look up this property on Evalweb and the Registre foncier.</div>
+  </div>`);
+
+  return `<div class="pc-detail"><div class="detail-grid">${sections.join("")}</div></div>`;
+}
+
+function toggleExpand(id) {
+  S.expanded = S.expanded === id ? null : id;
+  renderResults();
+}
+
+// ── FILTER POPOVER ────────────────────────────────────────────────────────────
+let activePop = null;
+
+function openFilterPop(fid, headerEl) {
+  closePop();
+  const f = FIELD_MAP[fid];
+  if (!f || f.unavail || !f.filterType) return;
+
+  const rect = headerEl.getBoundingClientRect();
+  const pop = document.createElement("div");
+  pop.className = "fb-pop";
+  pop.id = "active-pop";
+
+  const cur = S.filters[fid] || {};
+  let body = "";
+
+  if (f.filterType === "range") {
+    body = `<div class="pop-row">
+      <div><label>Min ${f.unit||""}</label><input type="number" id="pop-min" value="${cur.min||""}" placeholder="Min"/></div>
+      <div><label>Max ${f.unit||""}</label><input type="number" id="pop-max" value="${cur.max||""}" placeholder="Max"/></div>
+    </div>`;
+  } else if (f.filterType === "text") {
+    body = `<div class="pop-row"><div><label>Contains</label><input type="text" id="pop-text" value="${cur.value||""}" placeholder="Filter…"/></div></div>`;
+  } else if (f.filterType === "bool") {
+    body = `<div><label class="pop-check"><input type="radio" name="pop-bool" value="" ${!cur.value?"checked":""}> Any</label>
+      <label class="pop-check"><input type="radio" name="pop-bool" value="true" ${cur.value==="true"?"checked":""}> Yes</label>
+      <label class="pop-check"><input type="radio" name="pop-bool" value="false" ${cur.value==="false"?"checked":""}> No</label></div>`;
+  } else if (f.filterType === "select") {
+    const opts = fid==="borough" ? ["", ...S.boroughs] : fid==="use_type" ? ["", ...S.useTypes] : [""];
+    body = `<div class="pop-row"><div><label>Select</label><select id="pop-sel">${opts.map(o=>`<option value="${o}" ${cur.value===o?"selected":""}>${o||"All"}</option>`).join("")}</select></div></div>`;
+  }
+
+  pop.innerHTML = `<div class="pop-title">Filter: ${f.label}</div>
+    <div class="pop-body">${body}</div>
+    <div class="pop-footer">
+      <button class="pop-reset" onclick="clearFilter('${fid}')">Clear</button>
+      <button class="pop-apply" onclick="applyFilter('${fid}','${f.filterType}')">Apply</button>
+    </div>`;
+
+  pop.style.left = `${Math.min(rect.left, window.innerWidth-250)}px`;
+  pop.style.top  = `${rect.bottom}px`;
+  document.body.appendChild(pop);
+  activePop = pop;
+  setTimeout(() => document.addEventListener("click", outsideClickPop), 10);
+  // Focus first input
+  const inp = pop.querySelector("input,select");
+  if (inp) { inp.focus(); inp.addEventListener("keydown", e=>{ if(e.key==="Enter") applyFilter(fid, f.filterType); }); }
+}
+
+function outsideClickPop(e) {
+  if (activePop && !activePop.contains(e.target)) closePop();
+}
+
+function closePop() {
+  if (activePop) { activePop.remove(); activePop = null; }
+  document.removeEventListener("click", outsideClickPop);
+}
+
+function applyFilter(fid, type) {
+  closePop();
+  if (type === "range") {
+    const mn = ge("pop-min")?.value, mx = ge("pop-max")?.value;
+    if (mn||mx) S.filters[fid] = {type:"range", min:mn, max:mx};
+    else delete S.filters[fid];
+  } else if (type === "text") {
+    const v = ge("pop-text")?.value;
+    if (v) S.filters[fid] = {type:"text", value:v};
+    else delete S.filters[fid];
+  } else if (type === "bool") {
+    const v = document.querySelector("input[name='pop-bool']:checked")?.value;
+    if (v) S.filters[fid] = {type:"bool", value:v};
+    else delete S.filters[fid];
+  } else if (type === "select") {
+    const v = ge("pop-sel")?.value;
+    if (v) { S.filters[fid] = {type:"select", value:v}; }
+    else delete S.filters[fid];
+  }
+  renderChips();
+  // Server-side filters need refetch
+  const serverFilters = ["borough","use_type","nb_logements","year_built","lot_m2","bldg_m2"];
+  if (serverFilters.includes(fid)) refetch();
+  else renderResults();
+  renderFieldPanel(ge("pf-search").value);
+}
+
+function clearFilter(fid) {
+  closePop();
+  delete S.filters[fid];
+  renderChips();
+  renderFieldPanel(ge("pf-search").value);
+  refetch();
+}
+
+function clearAllFilters() {
+  S.filters = {};
+  renderChips();
+  renderFieldPanel(ge("pf-search").value);
+  refetch();
+}
+
+// ── FILTER CHIPS ──────────────────────────────────────────────────────────────
+function renderChips() {
+  const area = ge("chips-area");
+  area.innerHTML = "";
+  Object.entries(S.filters).forEach(([fid, filt]) => {
+    if (!filt) return;
+    const f = FIELD_MAP[fid];
+    let label = f?.label || fid;
+    let val = "";
+    if (filt.type==="range") val = `${filt.min||""}–${filt.max||""}`;
+    else if (filt.type==="text") val = `"${filt.value}"`;
+    else if (filt.type==="bool") val = filt.value==="true"?"Yes":"No";
+    else if (filt.type==="select") val = filt.value;
+    const chip = document.createElement("div");
+    chip.className = "fb-chip has-val";
+    chip.innerHTML = `${label}: ${val} <span class="chip-x" onclick="event.stopPropagation();clearFilter('${fid}')">×</span>`;
+    chip.onclick = () => openFilterPop(fid, chip);
+    area.appendChild(chip);
+  });
+}
+
+// ── SEARCH ────────────────────────────────────────────────────────────────────
+let _suggTimer = null;
+ge("t-search").addEventListener("input", e => {
+  const q = e.target.value.trim();
+  clearTimeout(_suggTimer);
+  if (!q || q.length < 3) { ge("t-sugg").style.display = "none"; return; }
+  _suggTimer = setTimeout(() => fetchSugg(q), 300);
+});
+ge("t-search").addEventListener("keydown", e => {
+  const items = [...ge("t-sugg").querySelectorAll(".sugg-item")];
+  if (e.key==="ArrowDown") { e.preventDefault(); suggIdx=Math.min(suggIdx+1,items.length-1); items.forEach((el,i)=>el.classList.toggle("active",i===suggIdx)); }
+  else if (e.key==="ArrowUp") { e.preventDefault(); suggIdx=Math.max(suggIdx-1,-1); items.forEach((el,i)=>el.classList.toggle("active",i===suggIdx)); }
+  else if (e.key==="Enter") { e.preventDefault(); ge("t-sugg").style.display="none"; const q=suggIdx>=0&&S.suggR[suggIdx]?S.suggR[suggIdx].address:ge("t-search").value.trim(); if(q)doSearch(q); }
+  else if (e.key==="Escape") { ge("t-sugg").style.display="none"; }
+});
+ge("t-search").addEventListener("blur", () => setTimeout(()=>ge("t-sugg").style.display="none", 200));
+
+async function fetchSugg(q) {
+  if (!S.ok) return;
+  try {
+    const res = await fetch(`${API}/search?q=${encodeURIComponent(q)}`, {signal:AbortSignal.timeout(5000)});
+    const d = await res.json();
+    S.suggR = d.results || [];
+    renderSugg(q);
+  } catch(e) { ge("t-sugg").style.display = "none"; }
+}
+
+function renderSugg(q) {
+  const box = ge("t-sugg");
+  if (!S.suggR.length) { box.style.display="none"; return; }
+  suggIdx = -1;
+  box.innerHTML = S.suggR.slice(0,8).map((p,i)=>`
+    <div class="sugg-item" data-idx="${i}" onmousedown="doSearch('${(p.address||"").replace(/'/g,"\\'")}')">
+      <div class="sugg-addr">${p.address||"—"}</div>
+      <div class="sugg-meta">${p.borough||""} · ${p.use_type||""} · ${p.year_built?"Built "+p.year_built:""} · ${p.valuation?.estimated?fmtC(p.valuation.estimated):"—"}</div>
+    </div>`).join("");
+  box.style.display = "block";
+}
+
+async function doSearch(q) {
+  ge("t-search").value = q;
+  ge("t-sugg").style.display = "none";
+  if (!q || !S.ok) return;
+  showLoading(true);
+  try {
+    const res = await fetch(`${API}/search?q=${encodeURIComponent(q)}`, {signal:AbortSignal.timeout(15000)});
+    const d = await res.json();
+    S.data = d.results || [];
+    S.total = S.data.length;
+    S.totalPages = 1;
+    S.page = 0;
+    S.expanded = S.data.length === 1 ? S.data[0].id : null;
+    renderResults();
+  } catch(e) { showLoading(false); }
+}
+
+// ── LOADING STATE ─────────────────────────────────────────────────────────────
+function showLoading(show) {
+  ge("state-loading").style.display = show ? "block" : "none";
+  ge("prop-list").style.display = show ? "none" : "block";
+  ge("state-empty").style.display = "none";
+}
+
+// ── CONNECT ───────────────────────────────────────────────────────────────────
+async function connect() {
+  try {
+    const res = await fetch(`${API}/health`, {signal:AbortSignal.timeout(6000)});
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const h = await res.json();
+    S.ok = true;
+    ge("dot").className = "dot ok";
+    ge("status-lbl").textContent = "Connected";
+
+    const parts = [];
+    if (h.properties) parts.push(`${h.properties.toLocaleString()} properties`);
+    if (h.permits)    parts.push(`${h.permits.toLocaleString()} permits`);
+    if (h.stm_stops)  parts.push(`${h.stm_stops.toLocaleString()} STM stops`);
+    if (h.market_rates_loaded) parts.push(`${(h.transactions_loaded||0).toLocaleString()} transactions`);
+    if (h.geocache_streets > 0) parts.push(`${h.geocache_streets.toLocaleString()} streets geocoded`);
+    ge("t-counts").textContent = parts.join(" · ");
+
+    // Load boroughs
+    try {
+      const br = await fetch(`${API}/boroughs`, {signal:AbortSignal.timeout(5000)});
+      const bd = await br.json();
+      S.boroughs = bd.boroughs || [];
+    } catch(e) {}
+
+    fetchPage();
+  } catch(e) {
+    S.ok = false;
+    ge("dot").className = "dot err";
+    ge("status-lbl").textContent = "Offline";
+    ge("t-counts").textContent = "Start server.py · python3 -m http.server 3000";
+    ge("state-loading").style.display = "none";
+    ge("state-empty").style.display = "block";
+    ge("state-empty").innerHTML = `<div class="big">!</div>
+      Backend not running.<br><br>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--muted)">
+      Terminal 1: python3 server.py<br>
+      Terminal 2: python3 -m http.server 3000<br>
+      Browser: http://localhost:3000/montreal-propintel.html
+      </span>`;
+  }
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+renderFieldPanel();
+renderChips();
+connect();
+setInterval(() => { if (!S.ok) connect(); }, 8000);
+</script>
+</body>
+</html>
