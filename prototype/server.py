@@ -19,6 +19,20 @@ import zipfile
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from pathlib import Path
 
+# TODO: This was largely vibecoded and we should mark (1) with what LLM and (2) when/how it was done
+#       e.g., prompts used, errors found and fixed, reproduction steps where possible, etc
+
+# TODO: Libraries to use instead of reproducing functionality:
+# 1. `Shapely` for geospatial operations
+# 2. `requests` for pulling data
+# 3. `peewee` or another light ORM for DB access rather than raw queries
+# 4. `flask` or some other light webserver library (or consider `datasette`)
+# Why: these libraries handle an enormous amount of edge cases, can improve accuracy (projected coordinate systems),
+#      are reviewed for security issues, and reduce code to upkeep
+
+# TODO: this is all maybe fine for a prototype but we should very much separate out each stage
+#       Extract, Transform, Load (ETL), and Serve (e.g., the server)
+
 PORT = 8000
 DATA_DIR = Path(__file__).parent / "propintel_data"
 DB_PATH = DATA_DIR / "properties.db"
@@ -522,9 +536,12 @@ def backfill_boroughs_from_permits():
         return
     print("  Backfilling borough names from permits CSV...")
     street_to_borough = {}
+
+    # infer the separator
     with open(permits_path, encoding="utf-8", errors="replace") as f:
         sample = f.readline()
     sep = ";" if sample.count(";") > sample.count(",") else ","
+    
     with open(permits_path, encoding="utf-8", errors="replace") as f:
         reader = csv.DictReader(f, delimiter=sep)
         for row in reader:
@@ -537,6 +554,7 @@ def backfill_boroughs_from_permits():
             ).strip()
             # Street is in 'emplacement' (e.g. "81 rue Montigny") or NOM_RUE
             emplacement = (row.get("emplacement") or row.get("NOM_RUE") or "").strip()
+            
             # Extract street name from emplacement (skip leading civic number)
             m = re.match(r"^\s*\d+\s+(.+)$", emplacement)
             street = m.group(1).strip() if m else emplacement
@@ -1106,6 +1124,7 @@ def _build_parks_from_geojson_api_v2(c):
             print(f"  Failed: {url[:60]} — {e}")
 
 
+# TODO: dead code. there is a v2 that should just be renamed (let source control source control)
 def _build_parks_from_geojson_api():
     """
     Download espace_vert.json (GeoJSON FeatureCollection) and compute
@@ -2021,6 +2040,7 @@ def cubf_label(code):
         return str(code) if code else "Unknown"
 
 
+# TODO: probably okay for an approximation but it could also be across a river
 def haversine_m(lat1, lng1, lat2, lng2):
     R = 6371000
     p1, p2 = math.radians(lat1), math.radians(lat2)
@@ -2062,6 +2082,7 @@ def norm(s):
     s = s.lower().strip()
     # Strip parenthetical borough/zone qualifiers like "(MTL+WMT)", "(MTL)", "(WMT)"
     s = re.sub(r"\s*\([^)]*\)", "", s)
+    
     # Strip accents
     for fr, en in [
         ("é", "e"),
@@ -2111,7 +2132,7 @@ def parse_address(addr):
             pass
     return None, addr
 
-
+# TODO: just use the requests library it's a billion times cleaner
 def download(url, dest, desc):
     print(f"  Downloading {desc}…")
     dest.parent.mkdir(parents=True, exist_ok=True)
@@ -2273,6 +2294,8 @@ def build_properties_db():
     print("  Building property index (~60 seconds)…")
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
+
+    # TODO: unnecessarily destructive - sqlite has upsert https://sqlite.org/lang_upsert.html
     c.executescript("""
         DROP TABLE IF EXISTS properties;
         CREATE TABLE properties (
@@ -2302,6 +2325,7 @@ def build_properties_db():
     """)
 
     # Peek at CSV headers
+    # TODO: duplicated with other code above to infer separator 
     with open(csv_path, encoding="utf-8", errors="replace") as f:
         sample = f.readline()
     sep = ";" if sample.count(";") > sample.count(",") else ","
@@ -2714,6 +2738,9 @@ def build_market_rates():
     then use the assessment roll's dimension data to derive per-m² rates
     using the relationship: median_price = land_rate × avg_lot + build_rate × avg_bldg
     """
+
+    # TODO: any time the word "global" is used in python you are going to almost certainly encounter
+    #       data scope problems (among others)
     global MARKET_RATES, MARKET_RATES_LOADED, TRANSACTIONS_LOADED
 
     all_transactions = []
@@ -2728,6 +2755,7 @@ def build_market_rates():
                 continue
 
         try:
+            # TODO: again duplicated above
             with open(src["path"], encoding="utf-8", errors="replace") as f:
                 sample = f.readline()
             sep = ";" if sample.count(";") > sample.count(",") else ","
@@ -3020,6 +3048,7 @@ def estimate_value(borough, r):
 
     b = norm_borough_for_market(borough)
 
+    # TODO: this should be parameterized
     # ── Age depreciation factor ──────────────────────────────────────────────
     # Based on Quebec MEFQ depreciation tables — economic life 60-80 yrs residential.
     if yr >= 2015:
@@ -3414,7 +3443,7 @@ def enrich(r, ps, conn=None):
         "suite": r.get("suite", ""),
     }
 
-
+# SQLite has full text search see https://sqlite.org/fts5.html
 def search_properties(q, limit=10):
     """
     Search properties by address with multiple fallback strategies.
