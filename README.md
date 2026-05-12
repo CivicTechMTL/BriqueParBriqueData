@@ -6,6 +6,8 @@
 ## Research
 See our [HedgeDoc](https://pad.libreon.fr/r2BHlhmnRN--sFSUt7IDaw?view) for our initial research.
 
+A prototype for exploring the data space is in the [prototype/](/prototype/) folder.
+
 ## Installation
 TBD
 
