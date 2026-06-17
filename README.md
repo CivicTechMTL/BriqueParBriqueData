@@ -6,7 +6,16 @@
 ## Research
 See our [HedgeDoc](https://pad.libreon.fr/r2BHlhmnRN--sFSUt7IDaw?view) for our initial research.
 
-A prototype for exploring the data space is in the [prototype/](/prototype/) folder.
+A prototype for exploring the data space is in the [prototype/](./prototype/) folder.
+
+### Data Sources
+
+(Incomplete, see [prototype code](./prototype/server.py) for more)
+
+[Montreal Ma Carte Interactive](./research/montreal-ma-carte-interactive.md)
+
+[Quebec Provincial Parcel/Cadastral Data](./research/quebec.mrf-appli.foncier.gouv.qc.ca.md)
+
 
 ## Installation
 TBD
