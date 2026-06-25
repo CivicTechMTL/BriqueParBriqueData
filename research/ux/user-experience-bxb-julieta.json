@@ -1,0 +1,336 @@
+{
+  "version": "30.1.2",
+  "pages": [
+    {
+      "id": "uaw9n9yAcNCf6l5Fy7GH",
+      "name": "Page-1",
+      "cells": [
+        {
+          "id": "cITrgdi6wWk021lS45qO-11",
+          "type": "node",
+          "parent": "1"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-8",
+          "type": "node",
+          "parent": "cITrgdi6wWk021lS45qO-11",
+          "label": "Potential Site Opportunities list",
+          "html": "<font style=\"font-size: 9px;\">Potential Site Opportunities list</font>"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-9",
+          "type": "edge",
+          "parent": "cITrgdi6wWk021lS45qO-11",
+          "target": "cITrgdi6wWk021lS45qO-8"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-10",
+          "type": "edge",
+          "parent": "cITrgdi6wWk021lS45qO-11",
+          "target": "cITrgdi6wWk021lS45qO-8"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-12",
+          "type": "node",
+          "parent": "1"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-5",
+          "type": "node",
+          "parent": "cITrgdi6wWk021lS45qO-12"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-6",
+          "type": "node",
+          "parent": "cITrgdi6wWk021lS45qO-12",
+          "label": "Faiz"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-13",
+          "type": "node",
+          "parent": "1"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-1",
+          "type": "node",
+          "parent": "cITrgdi6wWk021lS45qO-13"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-7",
+          "type": "node",
+          "parent": "cITrgdi6wWk021lS45qO-13",
+          "label": "Julieta"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-15",
+          "type": "node",
+          "parent": "1",
+          "label": "We need more information on this address"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-17",
+          "type": "node",
+          "parent": "1"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-27",
+          "type": "node",
+          "parent": "1"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-28",
+          "type": "node",
+          "parent": "cITrgdi6wWk021lS45qO-27",
+          "label": "",
+          "html": "<pre align=\"left\"><br></pre>"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-29",
+          "type": "edge",
+          "parent": "cITrgdi6wWk021lS45qO-27",
+          "target": "cITrgdi6wWk021lS45qO-28"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-30",
+          "type": "edge",
+          "parent": "cITrgdi6wWk021lS45qO-27",
+          "target": "cITrgdi6wWk021lS45qO-28"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-32",
+          "type": "node",
+          "parent": "cITrgdi6wWk021lS45qO-27"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-31",
+          "type": "node",
+          "parent": "1",
+          "label": "We need the lot number for this address"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-20",
+          "type": "node",
+          "parent": "1"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-21",
+          "type": "edge",
+          "parent": "1",
+          "target": "cITrgdi6wWk021lS45qO-20"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-22",
+          "type": "edge",
+          "parent": "1",
+          "target": "cITrgdi6wWk021lS45qO-20"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-33",
+          "type": "node",
+          "parent": "1",
+          "label": "https://appli.foncier.gouv.qc.ca/infolot/",
+          "metadata": {
+            "link": "https://appli.foncier.gouv.qc.ca/infolot/"
+          }
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-39",
+          "type": "node",
+          "parent": "1",
+          "label": "https://montreal.ca/role-evaluation-fonciere",
+          "metadata": {
+            "link": "https://appli.foncier.gouv.qc.ca/infolot/"
+          }
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-40",
+          "type": "node",
+          "parent": "1"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-41",
+          "type": "node",
+          "parent": "1"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-42",
+          "type": "node",
+          "parent": "cITrgdi6wWk021lS45qO-41"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-43",
+          "type": "node",
+          "parent": "cITrgdi6wWk021lS45qO-41",
+          "label": "Julieta"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-44",
+          "type": "node",
+          "parent": "1",
+          "label": "We need property details - owner, value, etc"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-46",
+          "type": "node",
+          "parent": "1"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-53",
+          "type": "node",
+          "parent": "1"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-54",
+          "type": "node",
+          "parent": "cITrgdi6wWk021lS45qO-53"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-55",
+          "type": "node",
+          "parent": "cITrgdi6wWk021lS45qO-53",
+          "label": "Julieta"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-56",
+          "type": "node",
+          "parent": "1",
+          "label": "Zoning information tells us what we can do"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-57",
+          "type": "edge",
+          "parent": "1",
+          "source": "cITrgdi6wWk021lS45qO-28",
+          "target": "cITrgdi6wWk021lS45qO-46"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-58",
+          "type": "edge",
+          "parent": "1",
+          "source": "cITrgdi6wWk021lS45qO-28",
+          "target": "cITrgdi6wWk021lS45qO-20"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-64",
+          "type": "node",
+          "parent": "1"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-66",
+          "type": "node",
+          "parent": "1"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-67",
+          "type": "node",
+          "parent": "1",
+          "label": "https://montreal.ca/\nreglements-municipaux/recherche/",
+          "metadata": {
+            "link": "https://montreal.ca/reglements-municipaux/recherche/"
+          }
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-68",
+          "type": "node",
+          "parent": "1"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-71",
+          "type": "node",
+          "parent": "1"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-72",
+          "type": "node",
+          "parent": "1"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-73",
+          "type": "node",
+          "parent": "cITrgdi6wWk021lS45qO-72"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-74",
+          "type": "node",
+          "parent": "cITrgdi6wWk021lS45qO-72",
+          "label": "Julieta"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-75",
+          "type": "node",
+          "parent": "1",
+          "label": "Maps of the local area for context, other opportunities",
+          "html": "<font style=\"font-size: 7px;\">Maps of the local area for context, other opportunities</font>"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-76",
+          "type": "edge",
+          "parent": "1",
+          "source": "cITrgdi6wWk021lS45qO-28",
+          "target": "cITrgdi6wWk021lS45qO-71"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-77",
+          "type": "node",
+          "parent": "1"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-78",
+          "type": "node",
+          "parent": "1"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-79",
+          "type": "node",
+          "parent": "cITrgdi6wWk021lS45qO-78"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-80",
+          "type": "node",
+          "parent": "cITrgdi6wWk021lS45qO-78",
+          "label": "Julieta"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-81",
+          "type": "node",
+          "parent": "1",
+          "label": "Here are the properties with my analysis, notes"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-82",
+          "type": "node",
+          "parent": "1"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-83",
+          "type": "node",
+          "parent": "cITrgdi6wWk021lS45qO-82"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-84",
+          "type": "node",
+          "parent": "cITrgdi6wWk021lS45qO-82",
+          "label": "Faiz"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-85",
+          "type": "node",
+          "parent": "1",
+          "label": "We need more data on property 1234.\n\nI will reach out to owner of 9876.",
+          "html": "<div>We need more data on property 1234.</div><div><br></div><div>I will reach out to owner of 9876.</div>"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-87",
+          "type": "node",
+          "parent": "1"
+        },
+        {
+          "id": "cITrgdi6wWk021lS45qO-88",
+          "type": "node",
+          "parent": "1",
+          "label": "Weekly review"
+        }
+      ]
+    }
+  ]
+}
