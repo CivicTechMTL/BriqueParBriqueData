@@ -6,7 +6,22 @@
 ## Research
 See our [HedgeDoc](https://pad.libreon.fr/r2BHlhmnRN--sFSUt7IDaw?view) for our initial research.
 
-A prototype for exploring the data space is in the [prototype/](/prototype/) folder.
+A prototype for exploring the data space is in the [prototype/](./prototype/) folder.
+
+
+[User experience mapping](./research/ux/): Property research based on address, formats can be opened in [draw.io](https://draw.io/).
+
+
+### Data Sources
+
+(Incomplete, see [prototype code](./prototype/server.py) for more)
+
+[Montreal Ma Carte Interactive](./research/data_sources/montreal-ma-carte-interactive.md): Some zoning and lot data.
+
+[Quebec Provincial Parcel/Cadastral Data](./research/data_sources/quebec.mrf-appli.foncier.gouv.qc.ca.md): Lot numbers.
+
+[Montreal Rôle Foncier](./research/data_sources/montreal-rôle.foncier.md): a bunch of information about specific individual properties, searchable by address - ownership, building information, value in dollars.
+
 
 ## Installation
 TBD
