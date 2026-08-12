@@ -6,7 +6,7 @@ The [city of Montreal has a website](https://montreal.ca/role-evaluation-foncier
 
 The part of the city responsible - [Direction de l'évaluation foncière](https://montreal.ca/lieux/direction-de-levaluation-fonciere-point-de-service) - for this system are in Parc Extension.
 
-
+The raw data seems to be available in various formats on donnees.quebec.ca [here](https://www.donneesquebec.ca/recherche/dataset/roles-d-evaluation-fonciere-du-quebec/resource/8a79d011-0f0e-42fa-af68-049f741e8919)
 
 ## Data available
 
