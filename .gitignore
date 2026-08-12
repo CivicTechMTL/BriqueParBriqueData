@@ -1,2 +1,7 @@
 .DS_Store
 prototype/propintel_data/*
+
+# raw data folders
+data/extract/role-fonciere/out/*
+data/extract/zoning/*
+data/extract/bxb.duckdb*
