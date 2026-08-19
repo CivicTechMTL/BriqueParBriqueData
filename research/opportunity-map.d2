@@ -1,0 +1,56 @@
+title: |md 
+    # Opportunity Map 
+| { near: top-center }
+
+key: "Key" {
+    near: top-right
+    Opportunity
+    Potential Solution: { shape: parallelogram }
+}
+
+root: "We can find good properties and convert them into \nmission aligned spaces"
+properties: "Good properties are difficult to find"
+property-expense: "Publically listed properties are \nexpensive (>\$200/sqft)"
+property-restrictions: "Many properties have legal restrictions\non what can be built"
+
+flexibility-cost: {
+    label: "Being flexible produces considerable \ncoordination costs"
+    tooltip: "Commercial REITs can have huge holdings but few employees by specializing"
+}
+find-tenants: "It is difficult to find tenants\nready to move in quickly"
+
+
+root -> properties
+properties -> property-expense
+properties -> property-restrictions
+discover-prop-restrictions: "Discovering property restrictions is\nsomewhat labor intensive"
+property-restrictions -> discover-prop-restrictions
+curbcut: {
+    label: "CurbCut may have zoning \ndata compiled for all of MTL"
+    shape: parallelogram 
+}
+request-data: {
+    label: "We can request important property data\nfrom the burroughs and reduce the \ncurrent steps to evaluate properties"
+    shape: parallelogram 
+    style: {
+        stroke-width: 8
+    }
+}
+buy-data: {
+    label: "JLR has an potential solution but it is costly"
+    shape: parallelogram 
+}
+discover-prop-restrictions -> curbcut
+
+property-restrictions -> flexibility-cost
+property-expense -> find-tenants: Tenants can reduce financing risks
+
+
+non-public-info: "Discovering non-public information regarding\nproperties is complex"
+properties -> non-public-info
+declaration-of-trans: "Declaration of Transmission requires a \nlookup key and only works for physical owners, \nnot corporations"
+non-public-info -> declaration-of-trans: Declaration of Transmission \nindicates recent property changes
+corp-declaration-of-trans: "We don't know if there are public records \nwhen a company transfers property ownership"
+trans-fed: "Unclear if there is a \nfederal or municipal record \nof property transmission"
+non-public-info -> corp-declaration-of-trans
+non-public-info -> trans-fed
