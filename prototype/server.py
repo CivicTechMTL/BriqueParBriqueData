@@ -949,7 +949,6 @@ def _count_within(store, grid, lat, lng, radius_m, filter_fn=None):
                 count += 1
     return count
 
-
 # ── PARKS ──────────────────────────────────────────────────────────────────────
 def build_parks_db():
     """
@@ -1222,7 +1221,6 @@ def _build_parks_from_geojson_api():
     conn.close()
     print(f"  ✓ Parks: {len(batch):,} ({skipped} skipped)")
 
-
 def load_parks():
     global PARKS_STORE, _PARK_GRID
     try:
@@ -1236,7 +1234,6 @@ def load_parks():
         print(f"  ✓ Parks loaded: {len(PARKS_STORE):,}")
     except Exception as e:
         print(f"  Parks not loaded: {e}")
-
 
 # ── COMMERCIAL PREMISES ────────────────────────────────────────────────────────
 def build_commercial_db():
@@ -1306,7 +1303,6 @@ def build_commercial_db():
     conn.close()
     print(f"  ✓ Commercial premises: {count:,}")
 
-
 def load_commercial():
     global COMMERCIAL_STORE, _COM_GRID
     try:
@@ -1320,7 +1316,6 @@ def load_commercial():
         print(f"  ✓ Commercial: {len(COMMERCIAL_STORE):,}")
     except Exception as e:
         print(f"  Commercial not loaded: {e}")
-
 
 # ── FACILITIES & POI (via CKAN live API) ───────────────────────────────────────
 def fetch_ckan_geojson(resource_id, limit=5000):
@@ -1374,7 +1369,6 @@ def discover_facilities_resource_id():
             pass
     print("  ⚠ Facilities: no resource found in known packages")
     return None
-
 
 def load_facilities_from_ckan():
     """Load lieux-batiments-vocation-publique from CKAN into memory."""
@@ -1528,7 +1522,6 @@ def load_poi_from_ckan():
 ADDR_GEOCACHE = {}
 GEOCACHE_LOADED = False
 
-
 def build_geocache():
     """
     Build address geocache from the adresses-ponctuelles GeoJSON.
@@ -1614,7 +1607,6 @@ def build_geocache():
             # Use ijson if available, otherwise load fully (134MB is manageable)
             try:
                 import ijson
-
                 parser = ijson.items(f, "features.item")
                 for feat in parser:
                     try:
@@ -1854,7 +1846,6 @@ def _build_geocache_from_datastore(cache_path):
     except Exception as e:
         print(f"  Geocache save failed: {e}")
 
-
 def geocode_address(civic_num, street_raw):
     """
     Look up lat/lng for a civic + street using the address geocache.
@@ -1922,7 +1913,6 @@ def geocode_address(civic_num, street_raw):
                     return entries[0][1], entries[0][2]
 
     return None, None
-
 
 # ── FULL AMENITY PROXIMITY FOR A PROPERTY ─────────────────────────────────────
 def get_amenity_proximity(lat, lng):
@@ -2251,7 +2241,6 @@ def extract_borough_from_rue(rue_raw, rem_code, mun_raw="", civic_num=None):
     e.g. "rue Sylvain-Garneau  (MTL+RDP)" → Rivière-des-Prairies-PAT
     """
     import re as _re
-
     m = _re.search(r"\(([A-Z]{2,4}(?:\+[A-Z]{2,4})*)\)", rue_raw or "")
     if not m:
         return REM_BOROUGH_MAP.get(rem_code, "")
@@ -2585,7 +2574,6 @@ def get_rem(borough):
 
 # ── MARKET RATE ENGINE ────────────────────────────────────────────────────────
 
-
 def cubf_group(cubf, units=None):
     """
     Map CUBF code to property group for valuation.
@@ -2719,7 +2707,6 @@ def norm_borough_for_market(borough):
     if b in ("montreal", "ville de montreal", "agglomeration de montreal"):
         return ""
     return borough.strip()
-
 
 def build_market_rates():
     """
@@ -2893,7 +2880,6 @@ def build_market_rates():
 
     # Compute median price by borough × property group
     from statistics import median
-
     bucket = {}  # (arrond_norm, group) → [amounts]
     for t in all_transactions:
         arrond = norm_borough_for_market(t["arrond"])
@@ -4236,7 +4222,6 @@ def main():
 
     # ── Load network-dependent data in background thread ─────────────────────
     import threading
-
     def _bg():
         # Transactions + market rates (most important for valuation quality)
         try:
