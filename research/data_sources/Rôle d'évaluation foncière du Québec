@@ -1,0 +1,24 @@
+## Alternative source: bulk open data (Données Québec)
+
+The province (MAMH) publishes every municipal assessment roll in Québec as open data:
+https://www.donneesquebec.ca/recherche/dataset/roles-d-evaluation-fonciere-du-quebec
+
+- **Format:** one XML file per municipality (~1,140 total). Download all as a ZIP, or one municipality at a time via the CSV index.
+- **Latest:** 2026 index + ZIP (March 2026). A quarterly-update index also exists (last updated Aug 2026).
+- **Mapping:** georeferenced versions available (2026 in GPKG / FGDB).
+- **Update frequency:** annual (plus quarterly updates).
+- **Licence:** CC-BY 4.0 (attribution required).
+- **Field definitions:** see the "Guide sur les données du rôle" and "Répertoire des renseignements prescrits" PDFs on the dataset page.
+- **Contact:** evaluation.fonciere@mamh.gouv.qc.ca
+
+### What's NOT included
+- Owner name and postal address (Propriétaire section)
+- Cadastre / lot number
+
+These are only available one address at a time on the city website (see above) or at the clerk's office.
+
+⚠️ Re-identifying the redacted owner information is prohibited. 
+
+### Which source for what
+- **Bulk data:** screening many properties at once (building characteristics, land area, values)
+- **City website:** owner details and lot number for a specific property
