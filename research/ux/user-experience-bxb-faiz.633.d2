@@ -1,0 +1,33 @@
+direction: right
+
+1: "Incorrect listing" {
+    label.near: border-top-center
+    
+    screen: "Incorrect listing: residential duplex"
+    screen.icon: https://cdn.centris.ca/public/qc/consumersite/images/logos/logo-centris-ca.svg
+    screen.label.near: bottom-center
+    screen.shape: Rectangle
+    screen.style.font-color: grey
+
+    
+    bxb: |md Faiz: "Strange, no pictures of the first floor." |
+
+}
+
+2: "Visit" {
+    label.near: border-top-center
+    633.icon: https://icons.terrastruct.com/essentials%2F335-home.svg
+    633.width: 300
+    633.style.fill: white
+
+    private: |md Private Buyer: "This has a first floor kitchen, I'm looking for a duplex" |
+    bxb: |md Faiz: "I see potential." |
+}
+
+3: "Finance" {
+    label.near: border-top-center
+    bank: Bank: "Residential duplex? 2% interest rates? Shut up and take my money."
+    bxb: Faiz: "We also have a community bond"
+}
+
+1 -> 2 -> 3
